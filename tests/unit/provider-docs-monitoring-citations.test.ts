@@ -476,14 +476,15 @@ const citedNames = (doc: string): string[] => [...doc.matchAll(/`([A-Za-z][A-Za-
 /**
  * The class members `declarationLine` can match, in declaration order and deduplicated. The
  * `methods` literals below are drawn from this population, so it bounds what a derivation can
- * return; the line filter is deliberately the same loose one `declarationLine` uses.
+ * return; the line filter is deliberately the same loose one `declarationLine` uses. Modifiers
+ * match in any order: TypeScript accepts only `override async`, so a fixed order skips that member.
  */
 const declaredMembers = (source: string): string[] => {
   const names: string[] = [];
   for (const line of source.split("\n")) {
     if (!/^\s*(public|protected|private).*\b\w+\(/.test(line)) continue;
     const name =
-      /^\s*(?:public|protected|private)\s+(?:static\s+)?(?:async\s+)?(?:readonly\s+)?(?:abstract\s+)?(?:override\s+)?(?:get\s+|set\s+)?([A-Za-z_$][\w$]*)\s*[<(]/.exec(
+      /^\s*(?:public|protected|private)\s+(?:(?:static|abstract|override|readonly|async|get|set)\s+)*([A-Za-z_$][\w$]*)\s*[<(]/.exec(
         line,
       )?.[1];
     if (name && !names.includes(name)) names.push(name);
